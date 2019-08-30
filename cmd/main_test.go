@@ -34,6 +34,24 @@ func TestProcessLogfile(t *testing.T) {
 		assert.Equal(t, 23, c)
 	})
 
+	t.Run("success with empty file", func(t *testing.T) {
+		iMap := map[string]int{}
+		uMap := map[string]int{}
+
+		c, err := processLogFile("../testdata/empty.log", &iMap, &uMap)
+		assert.Nil(t, err)
+		assert.Equal(t, 0, c)
+	})
+
+	t.Run("success with empty row file", func(t *testing.T) {
+		iMap := map[string]int{}
+		uMap := map[string]int{}
+
+		c, err := processLogFile("../testdata/empty.log", &iMap, &uMap)
+		assert.Nil(t, err)
+		assert.Equal(t, 0, c)
+	})
+
 	t.Run("success processing", func(t *testing.T) {
 		iMap := map[string]int{}
 		uMap := map[string]int{}

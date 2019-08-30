@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"flag"
 	"fmt"
+	"io"
 	"sort"
 	"strings"
 
@@ -39,6 +40,7 @@ func main() {
 
 	ipaddrs := make(map[string]int)
 	webpags := make(map[string]int)
+
 	count, err := processLogFile(*filename, &ipaddrs, &webpags)
 	if err != nil {
 		log.WithError(err).Errorf("failed to process log file '%s'", *filename)
@@ -46,18 +48,7 @@ func main() {
 	}
 
 	if *verbose {
-		fmt.Printf("\n")
-		fmt.Printf("IP address usage\n")
-		for k, v := range ipaddrs {
-			fmt.Printf("%d : %s\n", v, k)
-		}
-		fmt.Print("\n")
-
-		fmt.Printf("URL usage\n")
-		for k, v := range webpags {
-			fmt.Printf("%d : %s\n", v, k)
-		}
-		fmt.Print("\n")
+		displayResults(&ipaddrs, &webpags)
 	}
 	fmt.Print("\n")
 
@@ -67,6 +58,26 @@ func main() {
 	fmt.Printf("most active IPs   : %s\n", getTopmost(&ipaddrs, 3))
 
 	os.Exit(0)
+}
+
+func displayResults(ipaddrs *map[string]int, webpags *map[string]int) {
+	fmt.Printf("\n")
+
+	fmt.Printf("IP address usage\n")
+	if ipaddrs != nil {
+		for k, v := range *ipaddrs {
+			fmt.Printf("%d : %s\n", v, k)
+		}
+		fmt.Print("\n")
+	}
+
+	fmt.Printf("URL usage\n")
+	if webpags != nil {
+		for k, v := range *webpags {
+			fmt.Printf("%d : %s\n", v, k)
+		}
+		fmt.Print("\n")
+	}
 }
 
 func processLogFile(filename string, ipaddrs *map[string]int, webpags *map[string]int) (int, error) {
@@ -82,11 +93,12 @@ func processLogFile(filename string, ipaddrs *map[string]int, webpags *map[strin
 	for {
 		c, err := processEntry(fs, ipaddrs, webpags)
 		if err != nil {
-			break
+			if err == io.EOF {
+				return count, nil
+			}
+			return count, err
 		}
-		if c > 0 {
-			count++
-		}
+		count += c
 	}
 	return count, nil
 }
