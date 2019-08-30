@@ -1,7 +1,9 @@
 package main
 
 import (
+	"bufio"
 	"os"
+	"strings"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
@@ -48,6 +50,37 @@ func TestProcessLogfile(t *testing.T) {
 		assert.Equal(t, 2, uMap["/intranet-analytics/2"])
 		assert.Equal(t, 1, uMap["/intranet-analytics/3"])
 	})
+
+	t.Run("success processEntry", func(t *testing.T) {
+		iMap := map[string]int{}
+		uMap := map[string]int{}
+
+		r := strings.NewReader("3.3.3.3 - - [10/Jul/2018:22:21:28 +0200] \"GET /intranet-analytics/3 HTTP/1.1\"\n")
+		c, err := processEntry(bufio.NewReader(r), &iMap, &uMap)
+		assert.Nil(t, err)
+		assert.Equal(t, 1, c)
+	})
+
+	t.Run("success process nothing", func(t *testing.T) {
+		iMap := map[string]int{}
+		uMap := map[string]int{}
+
+		r := strings.NewReader("")
+		c, err := processEntry(bufio.NewReader(r), &iMap, &uMap)
+		assert.NotNil(t, err)
+		assert.Equal(t, 0, c)
+	})
+
+	t.Run("success process empty line", func(t *testing.T) {
+		iMap := map[string]int{}
+		uMap := map[string]int{}
+
+		r := strings.NewReader("\n")
+		c, err := processEntry(bufio.NewReader(r), &iMap, &uMap)
+		assert.Nil(t, err)
+		assert.Equal(t, 0, c)
+	})
+
 }
 
 func TestAccumulate(t *testing.T) {

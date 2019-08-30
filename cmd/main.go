@@ -96,16 +96,23 @@ func processEntry(reader *bufio.Reader, ipaddrs *map[string]int, webpags *map[st
 	if err != nil {
 		return 0, err
 	}
+	s = strings.TrimSpace(s)
 	if len(s) <= 0 {
 		return 0, nil
 	}
 	t := strings.Split(s, " ")
+	if len(t) < 7 {
+		return 0, nil
+	}
 	if *verbose {
 		fmt.Printf("%s, %s\n", t[0], t[6])
 	}
-	accumulate(ipaddrs, t[0])
-	accumulate(webpags, t[6])
-
+	if err = accumulate(ipaddrs, t[0]); err != nil {
+		return 0, err
+	}
+	if err = accumulate(webpags, t[6]); err != nil {
+		return 0, err
+	}
 	return 1, nil
 }
 
