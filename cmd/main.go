@@ -87,6 +87,11 @@ func processLogFile(filename string, ipaddrs *map[string]int, webpags *map[strin
 	}
 	defer f.Close()
 
+	// scanner := bufio.NewScanner(f)
+	// for scanner.Scan() {
+	// 	fmt.Printf("%s\n", scanner.Text())
+	// }
+
 	count := 0
 	fs := bufio.NewReader(f)
 
@@ -119,6 +124,7 @@ func processEntry(reader *bufio.Reader, ipaddrs *map[string]int, webpags *map[st
 	if *verbose {
 		fmt.Printf("%s, %s\n", t[0], t[6])
 	}
+	// What to do if only one accumulate call fails?
 	if err = accumulate(ipaddrs, t[0]); err != nil {
 		return 0, err
 	}
